@@ -2,7 +2,7 @@ package mediainfo_test
 
 import (
 	"fmt"
-	"github.com/zhulik/go_mediainfo"
+	"github.com/pavelgopanenko/go_mediainfo"
 	"io/ioutil"
 	"os"
 	"testing"

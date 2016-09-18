@@ -7,9 +7,16 @@ import "C"
 
 import (
 	"fmt"
-	"runtime"
 	"strconv"
 	"unsafe"
+)
+
+const (
+	General = C.MediaInfo_Stream_General
+	Video   = C.MediaInfo_Stream_Video
+	Audio   = C.MediaInfo_Stream_Audio
+	Image   = C.MediaInfo_Stream_Image
+	Text    = C.MediaInfo_Stream_Text
 )
 
 // MediaInfo - represents MediaInfo class, all interaction with libmediainfo through it
@@ -28,12 +35,7 @@ func init() {
 
 // NewMediaInfo - constructs new MediaInfo
 func NewMediaInfo() *MediaInfo {
-	result := &MediaInfo{handle: C.GoMediaInfo_New()}
-	runtime.SetFinalizer(result, func(f *MediaInfo) {
-		f.Close()
-		C.GoMediaInfo_Delete(f.handle)
-	})
-	return result
+	return &MediaInfo{handle: C.GoMediaInfo_New()}
 }
 
 // OpenFile - opens file
@@ -62,12 +64,23 @@ func (mi *MediaInfo) OpenMemory(bytes []byte) error {
 // Close - closes file
 func (mi *MediaInfo) Close() {
 	C.GoMediaInfo_Close(mi.handle)
+	C.GoMediaInfo_Delete(mi.handle)
 }
 
 // Get - allow to read info from file
 func (mi *MediaInfo) Get(param string) (result string) {
 	p := C.CString(param)
 	r := C.GoMediaInfoGet(mi.handle, p)
+	result = C.GoString(r)
+	C.free(unsafe.Pointer(p))
+	C.free(unsafe.Pointer(r))
+	return
+}
+
+// GetStream - allow to read stream info from file
+func (mi *MediaInfo) GetStream(param string, stream int, typ uint32) (result string) {
+	p := C.CString(param)
+	r := C.GoMediaInfoGet2(mi.handle, p, C.size_t(stream), typ)
 	result = C.GoString(r)
 	C.free(unsafe.Pointer(p))
 	C.free(unsafe.Pointer(r))
@@ -113,4 +126,34 @@ func (mi *MediaInfo) Codec() string {
 // Format returns file codec
 func (mi *MediaInfo) Format() string {
 	return mi.Get("Format")
+}
+
+// StreamCount returns count of streams
+func (mi *MediaInfo) StreamCount(typ string) int {
+	val := mi.GetStream(typ, 0, General)
+	cnt, err := strconv.Atoi(val)
+	if err != nil {
+		return 0
+	}
+	return cnt
+}
+
+// VideoCount returns count of video streams
+func (mi *MediaInfo) VideoCount() int {
+	return mi.StreamCount("VideoCount")
+}
+
+// AudioCount returns count of audio streams
+func (mi *MediaInfo) AudioCount() int {
+	return mi.StreamCount("AudioCount")
+}
+
+// TextCount returns count of texts
+func (mi *MediaInfo) TextCount() int {
+	return mi.StreamCount("TextCount")
+}
+
+// ImageCount returns count of images
+func (mi *MediaInfo) ImageCount() int {
+	return mi.StreamCount("ImageCount")
 }

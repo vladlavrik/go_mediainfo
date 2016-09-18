@@ -16,7 +16,7 @@ const wchar_t *toWchar(const char *c)
 
 const char *toChar(const wchar_t *c)
 {
-    const size_t cSize = wcslen(c)+1;
+    const size_t cSize = wcslen(c) * 2 +1;
     char* wc = malloc(cSize * sizeof(char));
     wcstombs(wc, c, cSize);
     return wc;
@@ -43,10 +43,15 @@ size_t GoMediaInfo_OpenMemory(void *handle, char *bytes, size_t length) {
 
 void GoMediaInfo_Close(void *handle) {
     MediaInfo_Close(handle);
+    MediaInfo_Delete(handle);
 }
 
 const char *GoMediaInfoGet(void *handle, char *name) {
     return toChar(MediaInfo_Get(handle, MediaInfo_Stream_General, 0,  toWchar(name), MediaInfo_Info_Text, MediaInfo_Info_Name));
+}
+
+const char *GoMediaInfoGet2(void *handle, char *name, size_t stream, enum MediaInfo_stream_t type) {
+    return toChar(MediaInfo_Get(handle, type, stream,  toWchar(name), MediaInfo_Info_Text, MediaInfo_Info_Name));
 }
 
 const char *GoMediaInfoOption(void *handle, char *name, char *value) {
