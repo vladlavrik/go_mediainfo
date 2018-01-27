@@ -2,10 +2,11 @@ package mediainfo_test
 
 import (
 	"fmt"
-	"github.com/pavelgopanenko/go_mediainfo"
+	"github.com/vladlavrik/go_mediainfo"
 	"io/ioutil"
 	"os"
 	"testing"
+	"strconv"
 )
 
 const (
@@ -108,7 +109,8 @@ func TestDurationWithOgg(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(ogg)
 
-	if mi.Duration() != 3494 {
+	duration, _ := strconv.Atoi(mi.Get(mi.General, "Duration"))
+	if duration != 3494 {
 		t.Fail()
 	}
 }
@@ -117,7 +119,8 @@ func TestDurationWithMp3(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(mp3)
 
-	if mi.Duration() != 87771 {
+	duration, _ := strconv.Atoi(mi.Get(mi.General, "Duration"))
+	if duration != 87771 {
 		t.Fail()
 	}
 }
@@ -126,7 +129,7 @@ func TestCodecWithOgg(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(ogg)
 
-	if mi.Codec() != "OGG" {
+	if mi.Get(mi.General, "Codec") != "OGG" {
 		t.Fail()
 	}
 }
@@ -135,7 +138,7 @@ func TestCodecWithMp3(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(mp3)
 
-	if mi.Codec() != "MPEG Audio" {
+	if mi.Get(mi.General, "Codec") != "MPEG Audio" {
 		t.Fail()
 	}
 }
@@ -144,7 +147,7 @@ func TestFormatWithOgg(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(ogg)
 
-	if mi.Format() != "OGG" {
+	if mi.Get(mi.General, "Format") != "OGG" {
 		t.Fail()
 	}
 }
@@ -153,7 +156,7 @@ func TestFormatWithMp3(t *testing.T) {
 	mi := mediainfo.NewMediaInfo()
 	mi.OpenFile(mp3)
 
-	if mi.Format() != "MPEG Audio" {
+	if mi.Get(mi.General, "Format") != "MPEG Audio" {
 		t.Fail()
 	}
 }
@@ -164,7 +167,7 @@ func BenchmarkOpenAndDurationWithOgg(b *testing.B) {
 		mi := mediainfo.NewMediaInfo()
 		mi.OpenFile(ogg)
 
-		mi.Duration()
+		mi.Get(mi.General, "Duration")
 	}
 }
 
@@ -173,7 +176,7 @@ func BenchmarkOpenAndDurationWithMp3(b *testing.B) {
 		mi := mediainfo.NewMediaInfo()
 		mi.OpenFile(mp3)
 
-		mi.Duration()
+		mi.Get(mi.General, "Duration")
 	}
 }
 
@@ -184,7 +187,7 @@ func BenchmarkOpenMemoryAndDurationWithOgg(b *testing.B) {
 		bytes, _ := ioutil.ReadAll(f)
 
 		mi.OpenMemory(bytes)
-		mi.Duration()
+		mi.Get(mi.General, "Duration")
 	}
 }
 
@@ -195,7 +198,7 @@ func BenchmarkOpenMemoryAndDurationWithMp3(b *testing.B) {
 		bytes, _ := ioutil.ReadAll(f)
 
 		mi.OpenMemory(bytes)
-		mi.Duration()
+		mi.Get(mi.General, "Duration")
 	}
 }
 
@@ -216,6 +219,6 @@ func ExampleUsage() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(mi.AvailableParameters()) // Print all supported params for Get
-	fmt.Println(mi.Get("BitRate"))        // Print bitrate
+	fmt.Println(mi.AvailableParameters())		// Print all supported params for Get
+	fmt.Println(mi.Get(mi.General, "BitRate"))	// Print bitrate
 }

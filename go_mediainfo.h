@@ -26,10 +26,6 @@ void *GoMediaInfo_New() {
     return MediaInfo_New();
 }
 
-void GoMediaInfo_Delete(void *handle) {
-    MediaInfo_Delete(handle);
-}
-
 size_t GoMediaInfo_OpenFile(void *handle, char *name) {
     return MediaInfo_Open(handle, toWchar(name));
 }
@@ -46,12 +42,8 @@ void GoMediaInfo_Close(void *handle) {
     MediaInfo_Delete(handle);
 }
 
-const char *GoMediaInfoGet(void *handle, char *name) {
-    return toChar(MediaInfo_Get(handle, MediaInfo_Stream_General, 0,  toWchar(name), MediaInfo_Info_Text, MediaInfo_Info_Name));
-}
-
-const char *GoMediaInfoGet2(void *handle, char *name, size_t stream, enum MediaInfo_stream_t type) {
-    return toChar(MediaInfo_Get(handle, type, stream,  toWchar(name), MediaInfo_Info_Text, MediaInfo_Info_Name));
+const char *GoMediaInfoGet(void *handle, enum MediaInfo_stream_t type, char *name) {
+    return toChar(MediaInfo_Get(handle, type, 0,  toWchar(name), MediaInfo_Info_Text, MediaInfo_Info_Name));
 }
 
 const char *GoMediaInfoOption(void *handle, char *name, char *value) {

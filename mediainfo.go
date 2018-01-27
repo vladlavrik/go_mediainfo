@@ -43,7 +43,7 @@ func (mi *MediaInfo) OpenFile(path string) error {
 	p := C.CString(path)
 	s := C.GoMediaInfo_OpenFile(mi.handle, p)
 	if s == 0 {
-		return fmt.Errorf("MediaInfo can't open file: %s", path)
+		return fmt.Errorf("mediainfo can't open file: %s", path)
 	}
 	C.free(unsafe.Pointer(p))
 	return nil
@@ -52,11 +52,11 @@ func (mi *MediaInfo) OpenFile(path string) error {
 // OpenMemory - opens memory buffer
 func (mi *MediaInfo) OpenMemory(bytes []byte) error {
 	if len(bytes) == 0 {
-		return fmt.Errorf("Buffer is empty")
+		return fmt.Errorf("buffer is empty")
 	}
 	s := C.GoMediaInfo_OpenMemory(mi.handle, (*C.char)(unsafe.Pointer(&bytes[0])), C.size_t(len(bytes)))
 	if s == 0 {
-		return fmt.Errorf("MediaInfo can't open memory buffer")
+		return fmt.Errorf("mediainfo can't open memory buffer")
 	}
 	return nil
 }
@@ -64,23 +64,12 @@ func (mi *MediaInfo) OpenMemory(bytes []byte) error {
 // Close - closes file
 func (mi *MediaInfo) Close() {
 	C.GoMediaInfo_Close(mi.handle)
-	C.GoMediaInfo_Delete(mi.handle)
-}
-
-// Get - allow to read info from file
-func (mi *MediaInfo) Get(param string) (result string) {
-	p := C.CString(param)
-	r := C.GoMediaInfoGet(mi.handle, p)
-	result = C.GoString(r)
-	C.free(unsafe.Pointer(p))
-	C.free(unsafe.Pointer(r))
-	return
 }
 
 // GetStream - allow to read stream info from file
-func (mi *MediaInfo) GetStream(param string, stream int, typ uint32) (result string) {
+func (mi *MediaInfo) Get(typ uint32, param string) (result string) {
 	p := C.CString(param)
-	r := C.GoMediaInfoGet2(mi.handle, p, C.size_t(stream), typ)
+	r := C.GoMediaInfoGet(mi.handle, typ, p)
 	result = C.GoString(r)
 	C.free(unsafe.Pointer(p))
 	C.free(unsafe.Pointer(r))
@@ -112,25 +101,9 @@ func (mi *MediaInfo) AvailableParameters() string {
 	return mi.Option("Info_Parameters", "")
 }
 
-// Duration returns file duration
-func (mi *MediaInfo) Duration() int {
-	duration, _ := strconv.Atoi(mi.Get("Duration"))
-	return duration
-}
-
-// Codec returns file codec
-func (mi *MediaInfo) Codec() string {
-	return mi.Get("Codec")
-}
-
-// Format returns file codec
-func (mi *MediaInfo) Format() string {
-	return mi.Get("Format")
-}
-
 // StreamCount returns count of streams
 func (mi *MediaInfo) StreamCount(typ string) int {
-	val := mi.GetStream(typ, 0, General)
+	val := mi.Get(General, typ)
 	cnt, err := strconv.Atoi(val)
 	if err != nil {
 		return 0
